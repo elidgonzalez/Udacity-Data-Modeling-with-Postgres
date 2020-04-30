@@ -7,7 +7,8 @@ from sql_queries import *
 
 
 def process_song_file(cur, filepath):
-    # open song file
+    '''Using the filepath get the song and artist infoprmation of a song no info about it being played is provided here.'''
+
     df = pd.read_json(filepath, typ='series')
 
     # insert song record
@@ -20,13 +21,14 @@ def process_song_file(cur, filepath):
 
 
 def process_log_file(cur, filepath):
-    # open log file
+    '''Using filepath get the User, time, and song play data. This information is about the songs "playing" and the user "listening" to said song.'''
+
     df = pd.read_json(filepath, lines=True)
 
     # filter by NextSong action
     df = df[df['page'] == 'NextSong']
 
-    # convert timestamp column to datetime
+
     t = df.apply(lambda x: datetime.datetime.fromtimestamp(int(x['ts'])/1000.0), axis=1)
     
     # insert time data records
@@ -37,7 +39,7 @@ def process_log_file(cur, filepath):
     for i, row in time_df.iterrows():
         cur.execute(time_table_insert, list(row))
 
-    # load user table
+
     user_df = df[['userId', 'firstName', 'lastName', 'gender', 'level']]
 
     # insert user records
@@ -47,7 +49,7 @@ def process_log_file(cur, filepath):
     # insert songplay records
     for index, row in df.iterrows():
         
-        # get songid and artistid from song and artist tables
+
         cur.execute(song_select, (row.song, row.artist, row.length))
         results = cur.fetchone()
         
@@ -57,19 +59,20 @@ def process_log_file(cur, filepath):
             songid, artistid = None, None
 
         # insert songplay record
-        songplay_data = [index, datetime.datetime.fromtimestamp(row.ts/1000.0), row.userId, row.level, songid, artistid, row.sessionId, row.location, row.userAgent]
+        songplay_data = [datetime.datetime.fromtimestamp(row.ts/1000.0), row.userId, row.level, songid, artistid, row.sessionId, row.location, row.userAgent]
         cur.execute(songplay_table_insert, songplay_data)
 
 
 def process_data(cur, conn, filepath, func):
-    # get all files matching extension from directory
+    '''Helper function to get all of the files in the filepath and pass the appropriate function to the in this case process_song_file() and process_log_file()'''
+
     all_files = []
     for root, dirs, files in os.walk(filepath):
         files = glob.glob(os.path.join(root,'*.json'))
         for f in files :
             all_files.append(os.path.abspath(f))
 
-    # get total number of files found
+
     num_files = len(all_files)
     print('{} files found in {}'.format(num_files, filepath))
 

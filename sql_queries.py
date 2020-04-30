@@ -8,8 +8,8 @@ time_table_drop = "DROP table IF EXISTS time"
 
 # CREATE TABLES
 
-songplay_table_create = ("CREATE TABLE IF NOT EXISTS songplays (songplay_id int Primary Key, start_time time without time zone, user_id int, level text, song_id text, \
-                        artist_id text, session_id int, location text, user_agent text)")
+songplay_table_create = ("CREATE TABLE IF NOT EXISTS songplays (songplay_id SERIAL Primary Key, start_time time without time zone NOT NULL, user_id int NOT NULL, level text,  \
+                        song_id text, artist_id text, session_id int, location text, user_agent text)")
 
 user_table_create = ("CREATE TABLE IF NOT EXISTS users (user_id int Primary Key, first_name text, last_name text, gender text, level text)")
 
@@ -21,8 +21,8 @@ time_table_create = ("CREATE TABLE IF NOT EXISTS time (start_time time without t
 
 # INSERT RECORDS
 
-songplay_table_insert = ("INSERT INTO songplays (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent) \
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) \
+songplay_table_insert = ("INSERT INTO songplays (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent) \
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s) \
                         ON CONFLICT (songplay_id) DO UPDATE SET \
                         (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent) = (EXCLUDED.start_time, EXCLUDED.user_id, EXCLUDED.level, EXCLUDED.song_id \
                         , EXCLUDED.artist_id, EXCLUDED.session_id, EXCLUDED.location, EXCLUDED.user_agent)")
